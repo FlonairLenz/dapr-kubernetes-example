@@ -1,0 +1,42 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: dotnetapp
+  labels:
+    app: dotnet
+spec:
+  selector:
+    app: dotnet
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: LoadBalancer
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dotnetapp
+  labels:
+    app: dotnet
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dotnet
+  template:
+    metadata:
+      labels:
+        app: dotnet
+      annotations:
+        dapr.io/enabled: "true"
+        dapr.io/app-id: "dotnetapp"
+        dapr.io/app-port: "80"
+    spec:
+      containers:
+        - name: dotnetapp
+          image: <registry>.azurecr.io/dotnetdaprapp:latest
+          ports:
+            - containerPort: 80
+          imagePullPolicy: Always
